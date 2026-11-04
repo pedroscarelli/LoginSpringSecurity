@@ -21,11 +21,11 @@ public class RedefinePasswordEmailBody {
               <tr>
                 <td style="text-align:center; padding:32px 24px;">
                   <h1 style="color:#181818; margin:0 0 16px; font-weight:700; font-size:24px; line-height:1.5;">
-                    Token de redefinição de senha
+                    Password reset token
                   </h1>
                   <p style="color:#666; margin:0; font-size:16px; line-height:1.6;">
-                    Use o código abaixo para redefinir sua senha.<br>
-                    Válido por <strong>5 minutos</strong>
+                    Use the code below to reset your password.<br>
+                    Valid for <strong>5 minutes</strong>
                   </p>
                 </td>
               </tr>
@@ -41,7 +41,7 @@ public class RedefinePasswordEmailBody {
               <tr>
                 <td style="text-align:center; padding:0 24px 32px;">
                   <div style="color:#666; font-size:14px;">
-                    ⚠️ Não compartilhe este token com ninguém
+                    ⚠️ Don't share this token with anyone
                   </div>
                 </td>
               </tr>
@@ -51,7 +51,7 @@ public class RedefinePasswordEmailBody {
         """;
 
     public String of(String otpCode) {
-        Objects.requireNonNull(otpCode, "userId não pode ser nulo");
+        Objects.requireNonNull(otpCode, "userId must not be null");
 
         return String.format(TEMPLATE, otpCode);
     }

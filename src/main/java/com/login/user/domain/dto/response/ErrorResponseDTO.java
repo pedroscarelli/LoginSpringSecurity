@@ -17,7 +17,7 @@ public record ErrorResponseDTO(
             "about:blank",
             status.getReasonPhrase(),
             status.value(),
-            "Erro de validação. Verifique os detalhes.",
+            "Validation error. Check the details.",
             path,
             errors
         );

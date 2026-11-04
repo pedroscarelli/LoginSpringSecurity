@@ -44,7 +44,7 @@ public class TokenService {
                 .withArrayClaim("roles", roles.toArray(new String[0]))
                 .sign(algorithm);
         } catch(JWTCreationException exception){
-            throw new RuntimeException("Erro ao gerar token");
+            throw new RuntimeException("Error generating token");
         }
     }
 
@@ -58,7 +58,7 @@ public class TokenService {
                 .verify(token)
                 .getSubject();
         } catch(JWTVerificationException exception){
-            throw new RuntimeException("Erro ao gerar token: ", exception);
+            throw new RuntimeException("Error generating token: ", exception);
         }
     }
 

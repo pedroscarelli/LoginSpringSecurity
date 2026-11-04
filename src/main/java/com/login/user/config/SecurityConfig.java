@@ -64,7 +64,7 @@ public class SecurityConfig {
             response.setContentType("application/json;charset=UTF-8");
             String body = """
                 {
-                  "message": "Acesso negado: somente administradores têm permissão."
+                  "message": "Access denied: only administrators have permission."
                 }
                 """;
             response.getWriter().write(body);
@@ -78,7 +78,7 @@ public class SecurityConfig {
             response.setContentType("application/json;charset=UTF-8");
             String body = """
                 {
-                  "message": "Você precisa estar autenticado para acessar este recurso."
+                  "message": "You must be authenticated to access this resource."
                 }
                 """;
             response.getWriter().write(body);

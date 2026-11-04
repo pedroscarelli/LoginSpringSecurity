@@ -1,10 +1,10 @@
 **LoginSpringSecurity**
 
-API de autenticação e gerenciamento de usuários desenvolvida com Java, Spring Boot e Spring Security. Oferece features profissionais como soft delete, roles e permissões, envio de e-mails via SMTP e mais.
+Authentication and user management API built with Java, Spring Boot and Spring Security. It offers professional features such as soft delete, roles and permissions, sending e-mails via SMTP and more.
 
 ---
 
-## 🔧 Tecnologias
+## 🔧 Technologies
 
 - Java 17+
 - Spring Boot
@@ -19,19 +19,19 @@ API de autenticação e gerenciamento de usuários desenvolvida com Java, Spring
 
 ---
 
-## 🚀 Funcionalidades
+## 🚀 Features
 
-- Cadastro de usuários com ativação via e-mail
-- Login com JWT
-- Soft delete de usuários
-- Gerenciamento de roles e permissões
-- Redefinição de senha via OTP (envio de código por e-mail)
-- Paginação de listagem de usuários (somente Admin)
-- CRUD de usuários
+- User registration with e-mail activation
+- Login with JWT
+- User soft delete
+- Role and permission management
+- Password reset via OTP (code sent by e-mail)
+- Paginated user listing (Admin only)
+- User CRUD
 
 ---
 
-## 📦 Pré-requisitos
+## 📦 Prerequisites
 
 - Docker
 - Docker Compose
@@ -39,46 +39,46 @@ API de autenticação e gerenciamento de usuários desenvolvida com Java, Spring
 
 ---
 
-## ⚙️ Configuração e execução
+## ⚙️ Setup and running
 
-1. Clone este repositório e navegue até a pasta do projeto:
+1. Clone this repository and navigate to the project folder:
    ```bash
    git clone https://github.com/pedro-scarelli/LoginSpringSecurity.git
    cd LoginSpringSecurity
    ```
 
-2. Inicie a aplicação com Docker Compose:
+2. Start the application with Docker Compose:
    ```bash
    docker compose up --build
    ```
 
-A API estará disponível em `http://localhost:8080`.
+The API will be available at `http://localhost:8080`.
 
 ---
-## 📋 Documentação
+## 📋 Documentation
 
-Link para o swagger: http://localhost:8080/swagger-ui/index.html
+Swagger link: http://localhost:8080/swagger-ui/index.html
 
 ## Endpoints
 
-### 1. Cadastro de usuário
+### 1. User registration
 
 ```bash
 POST /v1/user
 Content-Type: application/json
 
 {
-  "name": "{NOME_DO_USUARIO}",
-  "email": "{EMAIL_DO_USUARIO}",
-  "password": "{SENHA_DO_USUARIO}"
+  "name": "{USER_NAME}",
+  "email": "{USER_EMAIL}",
+  "password": "{USER_PASSWORD}"
 }
 ```
-- Envia e-mail de confirmação para ativação da conta.
+- Sends a confirmation e-mail to activate the account.
 
-### 2. Ativação de conta
+### 2. Account activation
 
 ```bash
-GET /v1/user/activate/{ID_DO_USUARIO}
+GET /v1/user/activate/{USER_ID}
 ```
 
 ### 3. Login
@@ -88,69 +88,69 @@ POST /v1/auth/login
 Content-Type: application/json
 
 {
-  "email": "{EMAIL_DO_USUARIO}",
-  "password": "{SENHA_DO_USUARIO}"
+  "email": "{USER_EMAIL}",
+  "password": "{USER_PASSWORD}"
 }
 ```
-- Para contas criadas pelo Flyway, utilize a senha padrão: `senha123`.
+- For accounts created by Flyway, use the default password: `senha123`.
 
-### 4. Listar usuários (somente Admin)
+### 4. List users (Admin only)
 
 ```bash
-GET /v1/user?page={NÚMERO_PAGINA}&items={QTD_ITENS}
-Authorization: Bearer {TOKEN_JWT}
+GET /v1/user?page={PAGE_NUMBER}&items={ITEM_COUNT}
+Authorization: Bearer {JWT_TOKEN}
 ```
 
-### 5. Obter usuário
+### 5. Get user
 
 ```bash
-GET /v1/user/{ID_DO_USUARIO}
-Authorization: Bearer {TOKEN_JWT}
+GET /v1/user/{USER_ID}
+Authorization: Bearer {JWT_TOKEN}
 ```
 
-### 6. Atualizar usuário
+### 6. Update user
 
 ```bash
-PATCH /v1/user/{ID_DO_USUARIO}
+PATCH /v1/user/{USER_ID}
 Content-Type: application/json
-Authorization: Bearer {TOKEN_JWT}
+Authorization: Bearer {JWT_TOKEN}
 
 {
-  "name": "{NOVO_NOME}",
-  "password": "{NOVA_SENHA}"
+  "name": "{NEW_NAME}",
+  "password": "{NEW_PASSWORD}"
 }
 ```
 
-### 7. Deletar usuário (soft delete)
+### 7. Delete user (soft delete)
 
 ```bash
-DELETE /v1/user/{ID_DO_USUARIO}
-Authorization: Bearer {TOKEN_JWT}
+DELETE /v1/user/{USER_ID}
+Authorization: Bearer {JWT_TOKEN}
 ```
-- Marca o usuário como deletado e o remove das buscas.
+- Marks the user as deleted and removes them from searches.
 
-### 8. Ativar redefinição de senha
+### 8. Request password reset
 
 ```bash
 POST /v1/auth/redefine-password/activate
 Content-Type: application/json
 
 {
-  "email": "{EMAIL_DO_USUARIO}"
+  "email": "{USER_EMAIL}"
 }
 ```
-- Envia e-mail com código OTP.
+- Sends an e-mail with an OTP code.
 
-### 9. Redefinir senha
+### 9. Reset password
 
 ```bash
 PATCH /v1/auth/redefine-password
 Content-Type: application/json
 
 {
-  "email": "{EMAIL_DO_USUARIO}",
-  "otpCode": "{CODIGO_OTP}",
-  "newPassword": "{NOVA_SENHA}"
+  "email": "{USER_EMAIL}",
+  "otpCode": "{OTP_CODE}",
+  "newPassword": "{NEW_PASSWORD}"
 }
 ```
 
@@ -158,8 +158,8 @@ Content-Type: application/json
 
 ## 📸 Screenshots
 
-![Cadastro de usuário](https://github.com/user-attachments/assets/512f464a-dee8-4265-b9ae-5c91f74d7daa)
+![User registration](https://github.com/user-attachments/assets/512f464a-dee8-4265-b9ae-5c91f74d7daa)
 
-![OTP para redefinição de senha](https://github.com/user-attachments/assets/6201f6af-e628-4d66-b8e3-c4344ac99455)
+![Password reset OTP](https://github.com/user-attachments/assets/6201f6af-e628-4d66-b8e3-c4344ac99455)
 
 ---

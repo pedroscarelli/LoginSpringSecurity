@@ -36,7 +36,7 @@ public class AuthenticationService {
                 return user;
             }
         } catch (UserNotFoundException | AuthenticationException exception){
-            throw new IncorrectCredentialsException("Login ou senha incorretos");
+            throw new IncorrectCredentialsException("Incorrect login or password");
         }
 
         throw new UserNotFoundException();
@@ -79,7 +79,7 @@ public class AuthenticationService {
         var otpExpiry = user.getOtpTimestamp().plus(Duration.ofMinutes(5));
 
         if (isOtpCodeValid(user.getOtpCode(), incomingOtpCode, otpExpiry)) {
-            throw new UnauthorizedException("Redefinição de senha não autorizada");
+            throw new UnauthorizedException("Password reset not authorized");
         }
     }
 

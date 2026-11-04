@@ -30,7 +30,7 @@ public class AuthenticationController {
         var authenticatedUser = authenticationService.authenticateLogin(loginRequestDto);
         var token = tokenService.generateToken(authenticatedUser);
 
-        var response = Map.of("message", "Login efetuado com sucesso", "jwtAuthenticationToken", token);
+        var response = Map.of("message", "Login successful", "jwtAuthenticationToken", token);
 
         return ResponseEntity.ok(response);
     }
@@ -38,7 +38,7 @@ public class AuthenticationController {
     @PostMapping(path = "/redefine-password/activate", consumes = "application/json")
     public ResponseEntity<@NonNull Map<String, String>> activateUserRedefinePassword(@RequestBody @Valid EmailRequestDTO emailRequestDto) {
         authenticationService.activateRedefinePassword(emailRequestDto.email());
-        var response = Map.of("message", "Código para redefinição de senha enviado");
+        var response = Map.of("message", "Password reset code sent");
 
         return ResponseEntity.ok(response);
     }
@@ -50,7 +50,7 @@ public class AuthenticationController {
                 redefinePasswordRequestDto.newPassword(),
                 redefinePasswordRequestDto.email()
             );
-        var response = Map.of("message", "Senha redefinida com sucesso");
+        var response = Map.of("message", "Password reset successfully");
 
         return ResponseEntity.ok(response);
     }

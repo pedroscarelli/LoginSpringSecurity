@@ -3,7 +3,7 @@ package com.login.user.domain.exception;
 public class UnauthorizedException extends RuntimeException {
 
     public UnauthorizedException() {
-        super("Usuário não autenticado");
+        super("User not authenticated");
     }
 
     public UnauthorizedException(String message) {

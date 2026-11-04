@@ -18,26 +18,26 @@ public class ActivateUserEmailBody {
               <tr>
                 <td style="background-color:#1A237E; padding:24px 32px; border-radius:8px 8px 0 0; text-align:center;">
                   <h1 style="color:#fff; margin:0; font-weight:700; font-size:24px;">
-                    Bem-vindo à Login API – Spring Security
+                    Welcome to Login API – Spring Security
                   </h1>
                 </td>
               </tr>
               <tr>
                 <td style="padding:32px 24px; text-align:center;">
                   <p style="color:#181818; margin:0 0 16px; font-size:16px; line-height:1.6;">
-                    Obrigado por se cadastrar! Clique no botão abaixo para ativar sua conta:
+                    Thanks for signing up! Click the button below to activate your account:
                   </p>
                   <a href="%s/activate/%s"
                      style="display:inline-block; background-color:#1A237E; color:#fff;
                             text-decoration:none; border-radius:4px; padding:12px 24px;
                             font-size:16px; font-weight:600;">
-                    Ativar Conta
+                    Activate Account
                   </a>
                 </td>
               </tr>
               <tr>
                 <td style="padding:24px; text-align:center; font-size:12px; color:#666;">
-                  Se o botão não funcionar, copie e cole este link no seu navegador:<br>
+                  If the button doesn't work, copy and paste this link into your browser:<br>
                   <a href="%s/activate/%s" style="color:#1A237E; word-break:break-all;">
                     %s/activate/%s
                   </a>
@@ -53,7 +53,7 @@ public class ActivateUserEmailBody {
     }
 
     public String of(String userId) {
-        Objects.requireNonNull(userId, "userId não pode ser nulo");
+        Objects.requireNonNull(userId, "userId must not be null");
         String base = apiBaseUrl + "/v1/user";
 
         return String.format(TEMPLATE,

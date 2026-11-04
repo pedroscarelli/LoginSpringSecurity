@@ -45,7 +45,7 @@ public class UserController {
                     .path("/{id}")
                     .buildAndExpand(newUser.getId())
                     .toUri();
-        var message = Map.of("message", "Usuário criado com sucesso", "userId", newUser.getId());
+        var message = Map.of("message", "User created successfully", "userId", newUser.getId());
 
         return ResponseEntity.created(location).body(message);
     }
@@ -83,7 +83,7 @@ public class UserController {
     public ResponseEntity<@NonNull Map<String, Object>> deleteUser(@PathVariable("id") UUID id) {
         ValidationUtils.isTargetUserSameFromRequest(id);
         var deletedUser = userService.deleteUser(id);
-        Map<String, Object> message = Map.of("message", "Usuário deletado com sucesso", "userId", deletedUser.getId());
+        Map<String, Object> message = Map.of("message", "User deleted successfully", "userId", deletedUser.getId());
 
         return ResponseEntity.ok().body(message);
     }

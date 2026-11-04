@@ -3,6 +3,6 @@ package com.login.user.domain.exception;
 public class UserNotFoundException extends RuntimeException {
 
     public UserNotFoundException() {
-        super("Usuário não encontrado!");
+        super("User not found!");
     }
 }

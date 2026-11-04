@@ -32,7 +32,7 @@ public final class ValidationUtils {
         User userFromToken = (User) authentication.getPrincipal();
 
         if (!userFromToken.getId().equals(targetId) && userFromToken.getRole() != UserRole.ADMIN) {
-            throw new UnauthorizedException("Você não tem permissão para acessar este recurso");
+            throw new UnauthorizedException("You do not have permission to access this resource");
         }
     }
 }

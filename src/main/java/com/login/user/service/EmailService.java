@@ -37,17 +37,17 @@ public class EmailService {
 
     public void sendSignUpEmail(String to, UUID userId) {
         try {
-            sendHtmlEmail(to, "Ativação de usuário", activateUserEmailBody.of(userId.toString()));
+            sendHtmlEmail(to, "User activation", activateUserEmailBody.of(userId.toString()));
         } catch (MessagingException e) {
-            throw new EmailMessagingException("Erro ao enviar e-mail de ativação de usuário");
+            throw new EmailMessagingException("Error sending user activation e-mail");
         }
     }
 
     public void sendRedefinePasswordEmail(String to, String otpCode) {
         try {
-            sendHtmlEmail(to, "Redefinição de senha", redefinePasswordEmailBody.of(otpCode));
+            sendHtmlEmail(to, "Password reset", redefinePasswordEmailBody.of(otpCode));
         } catch (MessagingException e) {
-            throw new EmailMessagingException("Erro ao enviar e-mail de redefinição de senha");
+            throw new EmailMessagingException("Error sending password reset e-mail");
         }
     }
 }
