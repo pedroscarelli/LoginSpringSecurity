@@ -1,5 +1,6 @@
 package com.login.user.domain.dto.request;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 
-public record EmailRequestDTO(@Email String email) { }
+public record EmailRequestDTO(@NotBlank @Email String email) { }

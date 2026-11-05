@@ -51,7 +51,7 @@ public class RedefinePasswordEmailBody {
         """;
 
     public String of(String otpCode) {
-        Objects.requireNonNull(otpCode, "userId must not be null");
+        Objects.requireNonNull(otpCode, "otpCode must not be null");
 
         return String.format(TEMPLATE, otpCode);
     }

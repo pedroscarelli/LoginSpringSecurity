@@ -2,88 +2,115 @@ package com.login.user.service;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Random;
 
-import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.login.user.domain.dto.request.LoginRequestDTO;
-import com.login.user.domain.exception.*;
+import com.login.user.domain.exception.IncorrectCredentialsException;
+import com.login.user.domain.exception.UnauthorizedException;
+import com.login.user.domain.exception.UserNotActivatedException;
+import com.login.user.domain.exception.UserNotFoundException;
 import com.login.user.domain.model.User;
+import com.login.user.util.SecureTokens;
+
+import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @Service
 public class AuthenticationService {
- 
+
+    static final Duration OTP_VALIDITY = Duration.ofMinutes(5);
+    static final int MAX_OTP_ATTEMPTS = 5;
+
     private AuthenticationManager authenticationManager;
 
     private UserService userService;
 
     private EmailService emailService;
 
-    public User authenticateLogin(LoginRequestDTO loginRequestDto){
+    public User authenticateLogin(LoginRequestDTO loginRequestDto) {
+        User user;
         try {
-            var user = userService.getUserByEmail(loginRequestDto.email());
-            isUserActivated(user);
+            user = userService.getUserByEmail(loginRequestDto.email());
             var authenticationToken = new UsernamePasswordAuthenticationToken(loginRequestDto.email(), loginRequestDto.password());
-            var auth = this.authenticationManager.authenticate(authenticationToken);
-
-            if (auth.getPrincipal() instanceof UserDetails) {
-                return user;
-            }
-        } catch (UserNotFoundException | AuthenticationException exception){
+            authenticationManager.authenticate(authenticationToken);
+        } catch (UserNotFoundException | AuthenticationException exception) {
             throw new IncorrectCredentialsException("Incorrect login or password");
         }
 
-        throw new UserNotFoundException();
-    }
-
-    public void isUserActivated(User user) {
+        // Only reveal that the account is not activated after the password was checked.
         if (!user.isEnabled()) {
             throw new UserNotActivatedException();
         }
+
+        return user;
     }
 
+    /**
+     * Sends a reset code when the e-mail exists. It answers the same way when it doesn't,
+     * so the endpoint can't be used to find out which e-mails are registered.
+     */
     public void activateRedefinePassword(String email) {
-        var user = userService.getUserByEmail(email);
-        var otpCode = generateRandomFourDigitsNumber();
+        User user;
+        try {
+            user = userService.getUserByEmail(email);
+        } catch (UserNotFoundException exception) {
+            return;
+        }
+
+        var otpCode = SecureTokens.otpCode();
         user.setOtpCode(otpCode);
         user.setOtpTimestamp(Instant.now());
+        user.setOtpAttempts(0);
         userService.save(user);
 
         emailService.sendRedefinePasswordEmail(user.getEmail(), otpCode);
     }
 
-    public String generateRandomFourDigitsNumber() {
-        var random = new Random();
-        var randomFourDigitsNumber = 1000 + random.nextInt(9000);
-
-        return Integer.toString(randomFourDigitsNumber);
-    }
-
     public void redefinePassword(String otpCode, String newPassword, String email) {
-        var user = userService.getUserByEmail(email);
-        isRedefinePasswordAuthorized(user, otpCode);
- 
+        User user;
+        try {
+            user = userService.getUserByEmail(email);
+        } catch (UserNotFoundException exception) {
+            throw passwordResetNotAuthorized();
+        }
+
+        verifyOtpCode(user, otpCode);
+
         user.setPassword(userService.encodePassword(newPassword));
-        user.setOtpCode(null);
-        user.setOtpTimestamp(null);
+        clearOtp(user);
         userService.save(user);
     }
 
-    public void isRedefinePasswordAuthorized(User user, String incomingOtpCode) {
-        var otpExpiry = user.getOtpTimestamp().plus(Duration.ofMinutes(5));
+    void verifyOtpCode(User user, String incomingOtpCode) {
+        if (user.getOtpCode() == null || user.getOtpTimestamp() == null) {
+            throw passwordResetNotAuthorized();
+        }
 
-        if (isOtpCodeValid(user.getOtpCode(), incomingOtpCode, otpExpiry)) {
-            throw new UnauthorizedException("Password reset not authorized");
+        var expired = Instant.now().isAfter(user.getOtpTimestamp().plus(OTP_VALIDITY));
+        if (expired || user.getOtpAttempts() >= MAX_OTP_ATTEMPTS) {
+            clearOtp(user);
+            userService.save(user);
+            throw passwordResetNotAuthorized();
+        }
+
+        if (!SecureTokens.constantTimeEquals(user.getOtpCode(), incomingOtpCode)) {
+            user.setOtpAttempts(user.getOtpAttempts() + 1);
+            userService.save(user);
+            throw passwordResetNotAuthorized();
         }
     }
 
-    public boolean isOtpCodeValid(String userOtpCode, String incomingOtpCode, Instant otpExpiry) {
-        return userOtpCode == null || !userOtpCode.equals(incomingOtpCode) || Instant.now().isAfter(otpExpiry);
+    private void clearOtp(User user) {
+        user.setOtpCode(null);
+        user.setOtpTimestamp(null);
+        user.setOtpAttempts(0);
+    }
+
+    private UnauthorizedException passwordResetNotAuthorized() {
+        return new UnauthorizedException("Password reset not authorized");
     }
 }
