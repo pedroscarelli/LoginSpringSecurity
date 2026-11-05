@@ -2,17 +2,12 @@ package com.login.user.service;
 
 import java.time.Instant;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
-import com.login.user.domain.mapper.UserMapper;
-import lombok.AllArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.login.user.domain.dto.request.CreateUserRequestDTO;
@@ -20,10 +15,13 @@ import com.login.user.domain.dto.request.UpdateUserRequestDTO;
 import com.login.user.domain.dto.response.UserPaginationResponseDTO;
 import com.login.user.domain.exception.DuplicateCredentialsException;
 import com.login.user.domain.exception.UserNotFoundException;
+import com.login.user.domain.mapper.UserMapper;
 import com.login.user.domain.model.User;
 import com.login.user.domain.model.enums.UserRole;
 import com.login.user.repository.UserRepository;
+import com.login.user.util.SecureTokens;
 
+import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @Service
@@ -35,10 +33,13 @@ public class UserService implements UserDetailsService {
 
     private final UserMapper userMapper;
 
+    private final PasswordEncoder passwordEncoder;
+
     public UserPaginationResponseDTO getAllUsers(int page, int items) {
         var users = userRepository.findAll(PageRequest.of(page - 1, items));
-        var usersResponseDto = StreamSupport.stream(users.spliterator(), false)
-            .map(userMapper::toDto).collect(Collectors.toList());
+        var usersResponseDto = users.getContent().stream()
+            .map(userMapper::toDto)
+            .toList();
 
         return new UserPaginationResponseDTO(
             users.getTotalElements(),
@@ -48,13 +49,7 @@ public class UserService implements UserDetailsService {
     }
 
     public User getUserById(UUID id) {
-        var optionalUser = userRepository.findById(id);
-
-        if(optionalUser.isPresent()){
-            return optionalUser.get();
-        }
-
-        throw new UserNotFoundException();
+        return userRepository.findById(id).orElseThrow(UserNotFoundException::new);
     }
 
     public void save(User userToSave) {
@@ -63,7 +58,7 @@ public class UserService implements UserDetailsService {
 
     public User getUserByEmail(String email) {
         var userFound = userRepository.findByEmail(email);
-        if(userFound == null){
+        if (userFound == null) {
             throw new UserNotFoundException();
         }
 
@@ -71,17 +66,18 @@ public class UserService implements UserDetailsService {
     }
 
     public User createUser(CreateUserRequestDTO createUserRequestDto) {
+        isUserCredentialsDuplicated(createUserRequestDto.email());
+
         var newUser = new User();
-        BeanUtils.copyProperties(createUserRequestDto, newUser);
-        newUser.setEnabled(false);
-
-        isUserCredentialsDuplicated(newUser.getEmail());
-
-        var hashedPassword = new BCryptPasswordEncoder().encode(newUser.getPassword());
-        newUser.setPassword(hashedPassword);
+        newUser.setName(createUserRequestDto.name());
+        newUser.setEmail(createUserRequestDto.email());
+        newUser.setPassword(encodePassword(createUserRequestDto.password()));
         newUser.setRole(UserRole.USER);
+        newUser.setEnabled(false);
+        newUser.setActivationToken(SecureTokens.activationToken());
         userRepository.save(newUser);
-        emailService.sendSignUpEmail(newUser.getEmail(), newUser.getId());
+
+        emailService.sendSignUpEmail(newUser.getEmail(), newUser.getActivationToken());
 
         return newUser;
     }
@@ -92,14 +88,18 @@ public class UserService implements UserDetailsService {
         }
     }
 
+    /** Applies only the fields that were sent; anything left null keeps its current value. */
     public User updateUser(UUID id, UpdateUserRequestDTO updateUserRequestDto) {
         var userToUpdate = getUserById(id);
 
-        BeanUtils.copyProperties(updateUserRequestDto, userToUpdate);
-        if (updateUserRequestDto.password() != null) {
-            var hashedPassword = encodePassword(userToUpdate.getPassword());
-            userToUpdate.setPassword(hashedPassword);
+        if (updateUserRequestDto.name() != null) {
+            userToUpdate.setName(updateUserRequestDto.name());
         }
+
+        if (updateUserRequestDto.password() != null) {
+            userToUpdate.setPassword(encodePassword(updateUserRequestDto.password()));
+        }
+
         userRepository.save(userToUpdate);
 
         return userToUpdate;
@@ -113,9 +113,12 @@ public class UserService implements UserDetailsService {
         return userToDelete;
     }
 
-    public void activateUser(UUID id) {
-        var userToActivate = getUserById(id);
+    public void activateUser(String activationToken) {
+        var userToActivate = userRepository.findByActivationToken(activationToken)
+            .orElseThrow(UserNotFoundException::new);
+
         userToActivate.setEnabled(true);
+        userToActivate.setActivationToken(null);
         userRepository.save(userToActivate);
     }
 
@@ -123,19 +126,17 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         var user = userRepository.findByEmail(email);
         if (user == null) {
-            throw new UserNotFoundException();
+            throw new UsernameNotFoundException("User not found");
         }
 
         return org.springframework.security.core.userdetails.User
             .withUsername(user.getUsername())
             .password(user.getPassword())
-            .roles("USER")
+            .authorities(user.getAuthorities())
             .build();
     }
 
     public String encodePassword(String password) {
-        var passwordEncoder = new BCryptPasswordEncoder();
-
         return passwordEncoder.encode(password);
     }
 }

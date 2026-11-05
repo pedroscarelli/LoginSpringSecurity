@@ -35,7 +35,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST, "/v1/user").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/v1/user/activate/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/v1/user/activate/{token}").permitAll()
                         .requestMatchers(HttpMethod.POST, "/v1/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/v1/auth/redefine-password/activate").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/v1/auth/redefine-password").permitAll()
@@ -64,7 +64,7 @@ public class SecurityConfig {
             response.setContentType("application/json;charset=UTF-8");
             String body = """
                 {
-                  "message": "Access denied: only administrators have permission."
+                  "message": "You do not have permission to access this resource."
                 }
                 """;
             response.getWriter().write(body);

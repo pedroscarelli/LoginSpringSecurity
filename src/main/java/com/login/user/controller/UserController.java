@@ -88,9 +88,9 @@ public class UserController {
         return ResponseEntity.ok().body(message);
     }
 
-    @GetMapping("/activate/{id}")
-    public ResponseEntity<@NonNull Void> activateUser(@PathVariable("id") UUID id) {
-        userService.activateUser(id);
+    @GetMapping("/activate/{token}")
+    public ResponseEntity<@NonNull Void> activateUser(@PathVariable("token") String token) {
+        userService.activateUser(token);
 
         return ResponseEntity.noContent().build();
     }

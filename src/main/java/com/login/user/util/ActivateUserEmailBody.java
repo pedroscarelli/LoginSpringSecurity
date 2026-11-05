@@ -52,13 +52,13 @@ public class ActivateUserEmailBody {
         apiBaseUrl = config.baseUrl();
     }
 
-    public String of(String userId) {
-        Objects.requireNonNull(userId, "userId must not be null");
+    public String of(String activationToken) {
+        Objects.requireNonNull(activationToken, "activationToken must not be null");
         String base = apiBaseUrl + "/v1/user";
 
         return String.format(TEMPLATE,
-                             base, userId,
-                             base, userId,
-                             base, userId);
+                             base, activationToken,
+                             base, activationToken,
+                             base, activationToken);
     }
 }

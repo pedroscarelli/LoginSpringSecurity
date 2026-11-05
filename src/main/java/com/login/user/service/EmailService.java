@@ -1,6 +1,5 @@
 package com.login.user.service;
 
-import java.util.UUID;
 
 import lombok.AllArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -35,9 +34,9 @@ public class EmailService {
         mailSender.send(message);
     }
 
-    public void sendSignUpEmail(String to, UUID userId) {
+    public void sendSignUpEmail(String to, String activationToken) {
         try {
-            sendHtmlEmail(to, "User activation", activateUserEmailBody.of(userId.toString()));
+            sendHtmlEmail(to, "User activation", activateUserEmailBody.of(activationToken));
         } catch (MessagingException e) {
             throw new EmailMessagingException("Error sending user activation e-mail");
         }
