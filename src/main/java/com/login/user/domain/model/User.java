@@ -60,6 +60,12 @@ public class User implements UserDetails {
     @Column (name="dt_otp_timestamp")
     private Instant otpTimestamp;
 
+    @Column (name="it_otp_attempts", nullable = false)
+    private int otpAttempts;
+
+    @Column (name="st_activation_token")
+    private String activationToken;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return role.getAuthorities();
