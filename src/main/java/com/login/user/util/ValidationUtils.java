@@ -7,7 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
-import com.login.user.domain.exception.UnauthorizedException;
+import com.login.user.domain.exception.ForbiddenException;
 import com.login.user.domain.model.User;
 import com.login.user.domain.model.enums.UserRole;
 
@@ -32,7 +32,7 @@ public final class ValidationUtils {
         User userFromToken = (User) authentication.getPrincipal();
 
         if (!userFromToken.getId().equals(targetId) && userFromToken.getRole() != UserRole.ADMIN) {
-            throw new UnauthorizedException("You do not have permission to access this resource");
+            throw new ForbiddenException();
         }
     }
 }

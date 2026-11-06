@@ -1,5 +1,8 @@
 package com.login.user.domain.exception;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.login.user.domain.model.RestErrorMessage;
 import com.login.user.domain.dto.response.ErrorResponseDTO;
 
@@ -19,13 +22,16 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
+    private static final Logger log = LoggerFactory.getLogger(RestExceptionHandler.class);
+
     private final Map<Class<? extends RuntimeException>, HttpStatus> exceptionStatusMap = new HashMap<>();
 
     @PostConstruct
     private void init() {
         exceptionStatusMap.put(UserNotFoundException.class, HttpStatus.NOT_FOUND);
-        exceptionStatusMap.put(DuplicateCredentialsException.class, HttpStatus.BAD_REQUEST);
-        exceptionStatusMap.put(IncorrectCredentialsException.class, HttpStatus.BAD_REQUEST);
+        exceptionStatusMap.put(DuplicateCredentialsException.class, HttpStatus.CONFLICT);
+        exceptionStatusMap.put(IncorrectCredentialsException.class, HttpStatus.UNAUTHORIZED);
+        exceptionStatusMap.put(ForbiddenException.class, HttpStatus.FORBIDDEN);
         exceptionStatusMap.put(UnauthorizedException.class, HttpStatus.UNAUTHORIZED);
         exceptionStatusMap.put(UserNotActivatedException.class, HttpStatus.UNAUTHORIZED);
         exceptionStatusMap.put(EmailMessagingException.class, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -33,7 +39,13 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     private ResponseEntity<@NonNull RestErrorMessage> handleKnownExceptions(RuntimeException ex) {
-        HttpStatus status = exceptionStatusMap.getOrDefault(ex.getClass(), HttpStatus.INTERNAL_SERVER_ERROR);
+        HttpStatus status = exceptionStatusMap.get(ex.getClass());
+        if (status == null) {
+            // Unexpected errors are logged, but their details never reach the client.
+            log.error("Unexpected error", ex);
+            var error = new RestErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
         return buildResponse(ex, status);
     }
 
