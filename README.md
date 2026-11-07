@@ -43,11 +43,16 @@ Authentication and user management API built with Java, Spring Boot and Spring S
 
 1. Clone this repository and navigate to the project folder:
    ```bash
-   git clone https://github.com/pedro-scarelli/LoginSpringSecurity.git
+   git clone https://github.com/pedroscarelli/LoginSpringSecurity.git
    cd LoginSpringSecurity
    ```
 
-2. Start the application with Docker Compose:
+2. Create your `.env` and set a real `JWT_SECRET` (at least 32 characters) and your SMTP credentials:
+   ```bash
+   cp .env.example .env
+   ```
+
+3. Start the application with Docker Compose:
    ```bash
    docker compose up --build
    ```
@@ -73,13 +78,15 @@ Content-Type: application/json
   "password": "{USER_PASSWORD}"
 }
 ```
-- Sends a confirmation e-mail to activate the account.
+- Returns `201`, or `409` if the e-mail is already registered.
+- Sends a confirmation e-mail with a one-time activation link.
 
 ### 2. Account activation
 
 ```bash
-GET /v1/user/activate/{USER_ID}
+GET /v1/user/activate/{ACTIVATION_TOKEN}
 ```
+- The token is a random value sent only by e-mail, and it can be used once.
 
 ### 3. Login
 
@@ -93,6 +100,7 @@ Content-Type: application/json
 }
 ```
 - For accounts created by Flyway, use the default password: `senha123`.
+- Returns `401` for a wrong e-mail or password, and `403` if the account has not been activated yet.
 
 ### 4. List users (Admin only)
 
@@ -128,6 +136,7 @@ DELETE /v1/user/{USER_ID}
 Authorization: Bearer {JWT_TOKEN}
 ```
 - Marks the user as deleted and removes them from searches.
+- Users can only read, update or delete their own account (`403` otherwise). Admins can manage any account.
 
 ### 8. Request password reset
 
@@ -139,7 +148,8 @@ Content-Type: application/json
   "email": "{USER_EMAIL}"
 }
 ```
-- Sends an e-mail with an OTP code.
+- Sends an e-mail with a 6-digit OTP code, valid for 5 minutes.
+- Always returns success, so the endpoint can't be used to find out which e-mails are registered.
 
 ### 9. Reset password
 
@@ -153,6 +163,17 @@ Content-Type: application/json
   "newPassword": "{NEW_PASSWORD}"
 }
 ```
+- The code is locked after 5 wrong attempts; request a new one.
+
+---
+
+## 🧪 Running the tests
+
+```bash
+mvn test
+```
+
+Unit tests cover login, activation, the OTP flow, partial updates, JWT validation and the security filter.
 
 ---
 
